@@ -4,3 +4,11 @@
  (libraries core zarith money ledger)
  (preprocess
   (pps ppx_jane)))
+
+(rule
+ (targets noto_sans_data.ml)
+ (deps ../fonts/NotoSans-Regular.ttf)
+ (action
+  (with-stdout-to
+   noto_sans_data.ml
+   (run gen/embed.exe %{deps}))))

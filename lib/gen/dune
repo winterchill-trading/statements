@@ -1,0 +1,5 @@
+; Turns a binary file into an OCaml module holding its bytes, so the bundled font is
+; compiled into the library and nothing is read from disk at run time.
+
+(executable
+ (name embed))

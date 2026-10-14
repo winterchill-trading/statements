@@ -20,8 +20,7 @@ let%expect_test "codes round-trip and subtags are ignored" =
 let%expect_test "resolve takes the first supported candidate, else English" =
   print_s [%sexp (Locale.resolve [ Some "it"; None; Some "fr-CH"; Some "de" ] : Locale.t)];
   print_s [%sexp (Locale.resolve [ None; Some "zz" ] : Locale.t)];
-  [%expect
-    {|
+  [%expect {|
     Fr
     En
     |}]

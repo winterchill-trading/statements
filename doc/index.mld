@@ -12,6 +12,8 @@ localised CSV and PDF rendering.
 - {!Statements.Statement}: the statement itself, built from journal records in memory
   or streamed from a journal file, with {!Statements.Statement.check} for its
   identities.
+- {!Statements.Source}: the same statement from a journal next to transfer records, for
+  systems that reserve money by transfer rather than by ledger holds.
 - {!Statements.Basis}: holds netted (the customer view) or every posting (the book
   view).
 - {!Statements.Annotation}: descriptions, counterparties and categories supplied by the

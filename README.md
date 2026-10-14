@@ -124,6 +124,7 @@ file (`scripts/check-pdf.sh`).
 | `Basis` | Netted or posting presentation |
 | `Annotation` | Caller-supplied description, counterparty, category |
 | `Statement` | The statement, `Builder` for streaming, `check`, file names, stable form |
+| `Source` | Statements from a journal alone, or from a journal next to transfer records for systems that reserve money by transfer instead of ledger holds |
 | `Locale`, `Catalogue` | Languages, labels, number and date formats |
 | `Csv` | RFC 4180 rendering |
 | `Pdf` | The statement document |

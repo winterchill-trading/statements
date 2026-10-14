@@ -1,0 +1,7 @@
+; Built and run in CI so the README example keeps compiling. Not installed.
+
+(executable
+ (name quickstart)
+ (libraries core money ledger statements)
+ (preprocess
+  (pps ppx_jane)))

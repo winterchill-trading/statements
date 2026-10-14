@@ -8,7 +8,7 @@
     to the journal and produces the same two bases:
 
     - [Posting]: the ledger as it is. Every entry on the account is a line, whatever
-      transfer it belongs to; nothing is pending.
+      transfer it belongs to, with [hold] set to the transfer's id; nothing is pending.
     - [Netted]: a transfer is one money-out line when it settles, dated at its settlement
       time and linked to it by {!Transfer.field-id} ([hold] and [held_since] on the line),
       placed in journal order at the latest ledger entry booked for it. A transfer that

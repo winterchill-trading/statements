@@ -321,7 +321,15 @@ let statement t ~account ~currency ~period ~basis ~now =
       Statement.create ~annotate t.records ~account ~currency ~period ~basis ~now
     in
     (match basis with
-     | Posting -> Ok ledger
+     | Posting ->
+       (* Link each entry of a transfer to it, as a ledger hold's entries are linked. *)
+       let lines =
+         List.map ledger.lines ~f:(fun (l : Statement.Line.t) ->
+           match l.hold, Map.find by_key l.idempotency_key with
+           | None, Some tr -> { l with hold = Some tr.id }
+           | _ -> l)
+       in
+       Ok { ledger with lines }
      | Netted ->
        let%bind booked = booked_entries t.records ~by_key ~account ~currency ~period in
        netted_with_transfers ~ledger ~annotate ~transfers ~booked ~period ~currency)

@@ -1,0 +1,51 @@
+{0 statements}
+
+Customer-facing account statements over a double-entry {{:https://github.com/winterchill-trading/ledger}ledger}:
+one account in one currency over a calendar month or up to twelve months of whole UTC
+days, with running balances, two ways of presenting card and payment holds, and
+localised CSV and PDF rendering.
+
+{1 Where to start}
+
+- {!Statements.Period}: months and day ranges, and the validation of a statement
+  request.
+- {!Statements.Statement}: the statement itself, built from journal records in memory
+  or streamed from a journal file, with {!Statements.Statement.check} for its
+  identities.
+- {!Statements.Basis}: holds netted (the customer view) or every posting (the book
+  view).
+- {!Statements.Annotation}: descriptions, counterparties and categories supplied by the
+  caller.
+- {!Statements.Catalogue} and {!Statements.Locale}: labels, numbers and dates in six
+  languages.
+- {!Statements.Csv} and {!Statements.Pdf}: the two renderings.
+- {!Statements.Pdf_writer}, {!Statements.Pdf_font}, {!Statements.Truetype},
+  {!Statements.Win_ansi}: the small PDF toolkit underneath, usable for other documents
+  such as receipts.
+
+{1 Example}
+
+The program [examples/quickstart.ml] in the repository builds a journal with a deposit,
+a settled card payment and a pending one, and renders the month's statement; CI builds
+and runs it.
+
+{[
+  let statement =
+    Statements.Statement.create
+      records
+      ~account:customer
+      ~currency:Money.Currency.eur
+      ~period:(Statements.Period.of_month { year = 2026; month = Oct })
+      ~basis:Netted
+      ~now
+    |> ok_exn
+  in
+  let csv = Statements.Csv.render statement in
+  let pdf =
+    Statements.Pdf.render
+      ~catalogue:(Statements.Catalogue.builtin De)
+      ~header:(Statements.Pdf.Header.create ~account_name:"Girokonto" ())
+      statement
+  in
+  ...
+]}

@@ -34,7 +34,7 @@ val to_string : t -> root:int -> ?info:int -> unit -> string
 
 (** {2 Values} *)
 
-(** A literal string, [(...)], with [\\], [(] and [)] escaped and bytes outside
+(** A literal string, [(...)], with backslashes and parentheses escaped and bytes outside
     printable ASCII written as octal escapes. *)
 val literal : string -> string
 

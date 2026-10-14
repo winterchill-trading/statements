@@ -19,6 +19,7 @@ jobs:
       - run: opam exec -- dune exec ./examples/quickstart.exe
       - name: Check rendered PDFs with qpdf and pdftotext
         run: |
+          sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends qpdf poppler-utils
           scripts/check-pdf.sh _build/default/bin/main.exe
       - run: opam install -y odoc

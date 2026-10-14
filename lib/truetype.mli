@@ -46,3 +46,7 @@ val subset : t -> int list -> string
 
 (** Glyph ids whose outlines are not empty in a font file: for tests. *)
 val non_empty_glyphs : t -> int list
+
+(** The bundled Noto Sans Regular (Latin, Greek, Cyrillic; SIL Open Font License 1.1),
+    parsed once. *)
+val bundled : unit -> t

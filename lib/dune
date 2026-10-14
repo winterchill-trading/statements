@@ -2,6 +2,7 @@
  (name statements)
  (public_name statements)
  (libraries core zarith money ledger)
+ (private_modules helvetica_widths noto_sans_data utf8)
  (preprocess
   (pps ppx_jane)))
 

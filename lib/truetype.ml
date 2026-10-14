@@ -309,3 +309,6 @@ let subset t glyphs =
     ~len:4;
   Bytes.to_string b
 ;;
+
+let bundled_font = lazy (parse Noto_sans_data.data |> ok_exn)
+let bundled () = force bundled_font

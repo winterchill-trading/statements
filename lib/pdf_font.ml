@@ -10,10 +10,7 @@ type t =
   | Embedded of embedded
 
 let standard () = Standard
-
-(* Parsed once per process: the bundled file is constant. *)
-let noto = lazy (Truetype.parse Noto_sans_data.data |> ok_exn)
-let embedded () = Embedded { font = force noto; used = Int.Table.create () }
+let embedded () = Embedded { font = Truetype.bundled (); used = Int.Table.create () }
 
 let choose strings =
   if List.for_all strings ~f:Win_ansi.can_encode then standard () else embedded ()

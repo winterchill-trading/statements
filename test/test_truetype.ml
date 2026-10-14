@@ -1,7 +1,7 @@
 open! Core
 open Statements
 
-let font = Truetype.parse Noto_sans_data.data |> ok_exn
+let font = Truetype.bundled ()
 let glyph c = Truetype.glyph font (Uchar.of_scalar_exn c)
 
 let%expect_test "metrics and code points of the bundled font" =

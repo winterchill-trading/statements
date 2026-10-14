@@ -1,0 +1,7 @@
+(executable
+ (name main)
+ (public_name statements)
+ (package statements)
+ (libraries core core_unix.command_unix money ledger statements)
+ (preprocess
+  (pps ppx_jane)))

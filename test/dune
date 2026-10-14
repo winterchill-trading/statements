@@ -1,0 +1,9 @@
+(library
+ (name statements_test)
+ (package statements)
+ (libraries core expect_test_helpers_core zarith money ledger statements)
+ (inline_tests
+  (flags
+   (:standard -source-tree-root .)))
+ (preprocess
+  (pps ppx_jane)))

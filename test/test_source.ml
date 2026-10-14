@@ -246,3 +246,164 @@ let%expect_test "errors" =
       (ledger_closing_without_transfers_in_flight "900.00 EUR")))
     |}]
 ;;
+
+(* The same payments run once as ledger holds (authorise, then capture or release) and
+   once as transfers through the in-flight account must give the same statement on both
+   bases, apart from codes, references and record numbers. *)
+module Payment = struct
+  type outcome =
+    | Settle of int
+    | Fail of int
+    | Open
+  [@@deriving sexp_of, quickcheck]
+
+  type t =
+    { cents : int
+    ; created : int (** days after 2026-08-20 *)
+    ; outcome : outcome (** days after [created] *)
+    }
+  [@@deriving sexp_of]
+
+  let quickcheck_generator =
+    let open Quickcheck.Generator.Let_syntax in
+    let%map cents = Int.gen_incl 1 100_000
+    and created = Int.gen_incl 0 45
+    and outcome =
+      Quickcheck.Generator.union
+        [ (Int.gen_incl 1 10 >>| fun d -> Settle d)
+        ; (Int.gen_incl 1 10 >>| fun d -> Fail d)
+        ; return Open
+        ]
+    in
+    { cents; created; outcome }
+  ;;
+
+  let day n = Time_ns.add (at "2026-08-20") (Time_ns.Span.of_day (Float.of_int n))
+
+  let amount t =
+    Money.Amount.of_minor_units_int Money.Currency.eur t.cents
+    |> Money.Amount.to_decimal_string
+  ;;
+end
+
+let comparable (s : Statement.t) =
+  ( s.totals
+  , s.held_for_pending
+  , s.ledger_balance_at_end
+  , List.map s.lines ~f:(fun l ->
+      l.business_date, l.direction, l.amount, l.balance, l.held_since, l.hold)
+  , List.map s.pending ~f:(fun p -> p.hold, p.business_date, p.amount, p.placed_at) )
+;;
+
+let%test_unit "transfers through an in-flight account read like ledger holds" =
+  Quickcheck.test
+    (List.gen_with_length 6 Payment.quickcheck_generator)
+    ~trials:300
+    ~sexp_of:[%sexp_of: Payment.t list]
+    ~f:(fun payments ->
+      let payments = List.mapi payments ~f:(fun i p -> sprintf "p%d" i, p) in
+      (* Every step of every payment, in time order. *)
+      let steps =
+        List.concat_map payments ~f:(fun (id, (p : Payment.t)) ->
+          (p.created, 0, id, p)
+          ::
+          (match p.outcome with
+           | Settle d | Fail d -> [ p.created + d, 1, id, p ]
+           | Open -> []))
+        |> List.stable_sort ~compare:(fun (a, x, _, _) (b, y, _, _) ->
+          [%compare: int * int] (a, x) (b, y))
+      in
+      let holds = create () in
+      let flows = create () in
+      push flows (Account_opened (Ledger.Account.create in_flight Liability));
+      deposit holds ~k:"dep-1" ~when_:(at "2026-08-01") "1000000.00";
+      deposit flows ~k:"dep-1b" ~when_:(at "2026-08-01") "1000000.00";
+      List.iter steps ~f:(fun (day, phase, id, p) ->
+        let when_ = Payment.day day in
+        let a = Payment.amount p in
+        match phase, p.outcome with
+        | 0, _ ->
+          authorise holds ~hold:id ~k:(id ^ "-start") ~when_ a;
+          start flows ~id ~when_ a
+        | _, Settle _ ->
+          settle holds ~hold:id ~k:(id ^ "-done") ~when_ ();
+          complete flows ~id ~when_ a
+        | _, Fail _ ->
+          release holds ~hold:id ~k:(id ^ "-back") ~when_;
+          give_back flows ~id ~when_ a
+        | _, Open -> assert false);
+      let transfers =
+        List.map payments ~f:(fun (id, p) ->
+          let created = Payment.day p.created in
+          let status, entries =
+            match p.outcome with
+            | Settle d ->
+              ( Transfer.Status.Settled { at = Payment.day (p.created + d) }
+              , [ id ^ "-start"; id ^ "-done" ] )
+            | Fail d ->
+              Failed { at = Payment.day (p.created + d) }, [ id ^ "-start"; id ^ "-back" ]
+            | Open -> Pending, [ id ^ "-start" ]
+          in
+          record ~id ~entries ~created status (Payment.amount p))
+      in
+      List.iter Basis.all ~f:(fun basis ->
+        let from_holds = build (Source.of_ledger (records holds)) basis |> ok_exn in
+        let from_transfers =
+          build (Source.of_transfers (records flows) ~transfers) basis |> ok_exn
+        in
+        let from_holds = comparable from_holds in
+        let from_transfers = comparable from_transfers in
+        if not
+             ([%equal:
+                Statement.Totals.t
+                * Money.Amount.t
+                * Money.Amount.t
+                * (Date.t
+                  * Statement.Direction.t
+                  * Money.Amount.t
+                  * Money.Amount.t
+                  * Time_ns.Alternate_sexp.t option
+                  * Ledger.Hold_id.t option)
+                    list
+                * (Ledger.Hold_id.t * Date.t * Money.Amount.t * Time_ns.Alternate_sexp.t)
+                    list]
+                from_holds
+                from_transfers)
+        then
+          raise_s
+            [%message
+              "bases differ"
+                (basis : Basis.t)
+                (from_holds
+                 : Statement.Totals.t
+                   * Money.Amount.t
+                   * Money.Amount.t
+                   * (Date.t
+                     * Statement.Direction.t
+                     * Money.Amount.t
+                     * Money.Amount.t
+                     * Time_ns.Alternate_sexp.t option
+                     * Ledger.Hold_id.t option)
+                       list
+                   * (Ledger.Hold_id.t
+                     * Date.t
+                     * Money.Amount.t
+                     * Time_ns.Alternate_sexp.t)
+                       list)
+                (from_transfers
+                 : Statement.Totals.t
+                   * Money.Amount.t
+                   * Money.Amount.t
+                   * (Date.t
+                     * Statement.Direction.t
+                     * Money.Amount.t
+                     * Money.Amount.t
+                     * Time_ns.Alternate_sexp.t option
+                     * Ledger.Hold_id.t option)
+                       list
+                   * (Ledger.Hold_id.t
+                     * Date.t
+                     * Money.Amount.t
+                     * Time_ns.Alternate_sexp.t)
+                       list)]))
+;;

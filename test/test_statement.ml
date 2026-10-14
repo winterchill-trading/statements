@@ -74,7 +74,7 @@ let%expect_test "posting basis: holds are lines when placed and released" =
       9.0   2026-09-03 CARD_AUTH         OUT    50.00    700.00  Coffee Corner
       10.0  2026-09-04 CARD_AUTH         OUT   120.00    580.00  Hotel
       11.0  2026-09-05 CARD_SETTLEMENT   IN      4.50    584.50  Coffee Corner
-      12.0  2026-09-06 HOLD              IN    120.00    704.50
+      12.0  2026-09-06 HOLD              IN    120.00    704.50  Hotel
       13.0  2026-09-10 WITHDRAWAL        OUT   100.00    604.50  To savings, "Ltd"
       14.0  2026-09-12 REVERSAL          IN    100.00    704.50   (reversal)
       16.0  2026-09-29 CARD_AUTH         OUT    20.00    684.50  Bookshop

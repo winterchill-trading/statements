@@ -66,7 +66,7 @@ let%expect_test "posting basis with a Russian preamble" =
     9.0,2026-09-03,2026-09-03T09:00:00Z,CARD_AUTH,BOOKED,OUT,-50.00,EUR,700.00,false,auth-1,Coffee Corner,,shopping,auth-1,\r\n
     10.0,2026-09-04,2026-09-04T09:00:00Z,CARD_AUTH,BOOKED,OUT,-120.00,EUR,580.00,false,auth-2,Hotel,,shopping,auth-2,\r\n
     11.0,2026-09-05,2026-09-05T09:00:00Z,CARD_SETTLEMENT,BOOKED,IN,4.50,EUR,584.50,false,auth-1,Coffee Corner,,shopping,auth-1,\r\n
-    12.0,2026-09-06,2026-09-06T09:00:00Z,HOLD,BOOKED,IN,120.00,EUR,704.50,false,,,,,auth-2,\r\n
+    12.0,2026-09-06,2026-09-06T09:00:00Z,HOLD,BOOKED,IN,120.00,EUR,704.50,false,,Hotel,,shopping,auth-2,\r\n
     13.0,2026-09-10,2026-09-10T09:00:00Z,WITHDRAWAL,BOOKED,OUT,-100.00,EUR,604.50,false,out-1,"To savings, ""Ltd""",,,,\r\n
     14.0,2026-09-12,2026-09-12T09:00:00Z,REVERSAL,BOOKED,IN,100.00,EUR,704.50,true,out-1,,,,,\r\n
     16.0,2026-09-29,2026-09-29T09:00:00Z,CARD_AUTH,BOOKED,OUT,-20.00,EUR,684.50,false,auth-3,Bookshop,,shopping,auth-3,\r\n

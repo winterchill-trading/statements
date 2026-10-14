@@ -105,9 +105,12 @@ type t =
 [@@deriving sexp_of, compare, equal]
 
 (** The statement of [account] in [currency] for [period] from a complete journal (in
-    sequence order, starting at record 1). [now] bounds {!field-as_of} for a period that
-    has not ended. Fails when a record breaks a ledger rule, when [account] is not opened
-    before the period ends, when the account is a pending sub-account, or (a bug) when an
+    sequence order, starting at record 1). A line whose annotation has an empty
+    description and that acts on a hold takes the description (and any counterparty and
+    category it lacks) from the entry that placed the hold, so a card settlement shows the
+    merchant named at authorisation. [now] bounds {!field-as_of} for a period that has not
+    ended. Fails when a record breaks a ledger rule, when [account] is not opened before
+    the period ends, when the account is a pending sub-account, or (a bug) when an
     identity of {!check} does not hold. *)
 val create
   :  ?annotate:(Ledger.Entry.t -> Annotation.t) (** default {!Annotation.default} *)

@@ -5,6 +5,7 @@ module Account_id = Ledger.Account_id
 module Balances = Ledger.Balances
 module Entry = Ledger.Entry
 module Record = Ledger.Record
+module Idempotency_key = Ledger.Idempotency_key
 
 module Direction = struct
   module T = struct
@@ -249,6 +250,29 @@ module Builder = struct
     placing.effective_at
   ;;
 
+  (* A settlement usually carries no text of its own; the authorisation it settles names
+     the merchant. *)
+  let annotation t state (e : Entry.t) =
+    let a = t.annotate e in
+    if not (String.is_empty a.description)
+    then a
+    else (
+      let placing =
+        let%bind.Option hold = Entry.Kind.hold e.kind in
+        let%bind.Option h = Balances.find_hold state hold in
+        Balances.find_entry state h.placed_by
+      in
+      match placing with
+      | Some (_, p) when not (Idempotency_key.equal p.idempotency_key e.idempotency_key)
+        ->
+        let from_hold = t.annotate p in
+        { Annotation.description = from_hold.description
+        ; counterparty = Option.first_some a.counterparty from_hold.counterparty
+        ; category = Option.first_some a.category from_hold.category
+        }
+      | _ -> a)
+  ;;
+
   let add t (r : Record.t) =
     let open Or_error.Let_syntax in
     if t.finished
@@ -330,7 +354,7 @@ module Builder = struct
                         (match t.basis with
                          | Netted -> held_since state e
                          | Posting -> None)
-                    ; annotation = t.annotate e
+                    ; annotation = annotation t state e
                     }
                   in
                   line :: lines_rev, Some balance)))

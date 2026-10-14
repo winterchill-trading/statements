@@ -1,7 +1,16 @@
 (library
  (name statements_test)
  (package statements)
- (libraries core expect_test_helpers_core zarith money ledger statements)
+ (libraries
+  core
+  core_unix
+  core_unix.filename_unix
+  async_kernel
+  expect_test_helpers_core
+  zarith
+  money
+  ledger
+  statements)
  (inline_tests
   (flags
    (:standard -source-tree-root .)))

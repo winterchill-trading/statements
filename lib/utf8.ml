@@ -10,3 +10,9 @@ let uchars s =
   in
   go 0 []
 ;;
+
+let of_uchars us =
+  let b = Buffer.create (List.length us) in
+  List.iter us ~f:(Stdlib.Buffer.add_utf_8_uchar b);
+  Buffer.contents b
+;;

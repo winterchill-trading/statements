@@ -65,7 +65,7 @@ dune build && dune test
 - Formatting: `opam exec --switch 5.2.0+ox -- dune build --root .. @statements/fmt --auto-promote`,
   after tests pass and promotion is done. Never run `dune fmt` at the workspace root.
 - Comments for humans at non-obvious choices (font metrics provenance, CLDR deviations).
-- `CHANGES.md`: a line under `## Unreleased` for every user-visible change.
+- `CHANGES.md`: a line under the next version for every user-visible change.
 - Catalogue texts: one row per label with six columns in `lib/catalogue.ml`; a new
   label needs all six, and templates keep their `{placeholders}`.
 
@@ -98,6 +98,11 @@ one `gh run watch <id> --exit-status`. Do not poll.
   every embedded PDF and the checksum in `fonts/README.md`.
 - PDF xref entries are exactly 20 bytes (`%010d 00000 n \n`); `test/test_pdf.ml`
   checks offsets and stream lengths, keep it passing after any writer change.
+- Changes after 0.1.0 are additive: keep `Statement.create`, `Builder` and the
+  `Stable.V1` digests; a new way to build lines goes in `Source`. `Source.of_transfers`
+  post-processes a ledger statement (netted for ledger holds, posting as is) and
+  re-checks it with `Statement.check`; `test/test_source.ml` has a property that
+  in-flight transfers and ledger holds give the same statement on both bases.
 - `Uchar`-level code uses `Stdlib.String.get_utf_8_uchar`; Core's `String` has no UTF-8
   iterator of that shape.
 

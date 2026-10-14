@@ -4,7 +4,19 @@ All notable changes to this library. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow semantic
 versioning once released.
 
-## Unreleased
+## 0.1.1
+
+### Added
+
+- `Source`: where a statement's lines come from. `Source.of_ledger` is the journal alone
+  (the same as `Statement.create`); `Source.of_transfers` reads a journal next to
+  transfer records (`Source.Transfer`: status, creation and status times, the ledger
+  entries booked for each) for systems that reserve money by transfer rather than by
+  ledger holds. On the netted basis a transfer is one line when it settles and pending
+  while in flight; on the posting basis its entries are lines linked to it. Fails when
+  the transfers do not reconcile with the ledger.
+
+## 0.1.0
 
 ### Added
 

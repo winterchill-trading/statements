@@ -2,41 +2,6 @@ open! Core
 open Statements
 open Helpers
 
-let show (s : Statement.t) =
-  print_s
-    [%message
-      ""
-        ~basis:(s.basis : Basis.t)
-        ~as_of:(s.as_of : Time_ns.Alternate_sexp.t)
-        ~opening:(Money.Amount.to_string s.totals.opening)
-        ~money_in:(Money.Amount.to_string s.totals.money_in)
-        ~money_out:(Money.Amount.to_string s.totals.money_out)
-        ~closing:(Money.Amount.to_string s.totals.closing)
-        ~held_for_pending:(Money.Amount.to_string s.held_for_pending)
-        ~ledger_balance_at_end:(Money.Amount.to_string s.ledger_balance_at_end)];
-  List.iter s.lines ~f:(fun l ->
-    printf
-      "  %-5s %s %-17s %-3s %8s %9s  %s%s%s\n"
-      (Statement.Line.entry_ref l)
-      (Date.to_string l.business_date)
-      (Ledger.Entry.Code.to_string l.code)
-      (Statement.Direction.to_string l.direction)
-      (Money.Amount.to_decimal_string l.amount)
-      (Money.Amount.to_decimal_string l.balance)
-      l.annotation.description
-      (if l.reversal then " (reversal)" else "")
-      (match l.held_since with
-       | None -> ""
-       | Some t -> " held since " ^ Time_ns.to_string_utc t));
-  List.iter s.pending ~f:(fun p ->
-    printf
-      "  pending %s %s %s %s\n"
-      (Ledger.Hold_id.to_string p.hold)
-      (Date.to_string p.business_date)
-      (Money.Amount.to_decimal_string p.amount)
-      p.annotation.description)
-;;
-
 let statement ?(period = september_period) basis =
   Statement.create
     (records (september ()))

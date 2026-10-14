@@ -16,3 +16,7 @@
    (:standard -source-tree-root .)))
  (preprocess
   (pps ppx_jane)))
+
+(cram
+ (package statements)
+ (deps %{bin:statements}))

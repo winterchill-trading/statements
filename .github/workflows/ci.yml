@@ -22,7 +22,8 @@ jobs:
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends qpdf poppler-utils
           scripts/check-pdf.sh _build/default/bin/main.exe
-      - run: opam install -y odoc
+      # odoc does not declare result; the local switch only had it transitively.
+      - run: opam install -y result odoc
       - name: Build API docs (odoc warnings fail the step)
         env:
           ODOC_WARN_ERROR: "true"
